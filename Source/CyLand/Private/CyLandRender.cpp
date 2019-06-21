@@ -858,7 +858,7 @@ FCyLandComponentSceneProxy::FCyLandComponentSceneProxy(UCyLandComponent* InCompo
 
 void FCyLandComponentSceneProxy::CreateRenderThreadResources()
 {
-	UE_LOG(LogCyLand, Warning, TEXT("Creating RenderThreadResources..."));
+	//UE_LOG(LogCyLand, Warning, TEXT("Creating RenderThreadResources...s"));
 	check(HeightmapTexture != nullptr);
 
 	if (IsComponentLevelVisible())
@@ -926,7 +926,7 @@ void FCyLandComponentSceneProxy::CreateRenderThreadResources()
 	// Assign vertex factory
 	VertexFactory = SharedBuffers->VertexFactory;
 
-	UE_LOG(LogCyLand, Warning, TEXT("Creating RenderThreadResources over... %d"), VertexFactory!=NULL);
+	//UE_LOG(LogCyLand, Warning, TEXT("Creating RenderThreadResources over... %d"), VertexFactory!=NULL);
 	// Assign CyLandCyUniformShaderParameters
 	CyLandCyUniformShaderParameters.InitResource();
 
@@ -2845,13 +2845,12 @@ bool FCyLandComponentSceneProxy::CollectOccluderElements(FOccluderElementsCollec
 //
 // FCyLandVertexBuffer
 //
-
 /**
 * Initialize the RHI for this rendering resource
 */
 void FCyLandVertexBuffer::InitRHI()
 {
-	UE_LOG(LogCyLand, Warning, TEXT("ACyLand InitRHI"));
+	//UE_LOG(LogCyLand, Warning, TEXT("ACyLand InitRHI"));
 	// create a static vertex buffer
 	FRHIResourceCreateInfo CreateInfo;
 	void* BufferData = nullptr;
@@ -2887,7 +2886,7 @@ void FCyLandVertexBuffer::InitRHI()
 template <typename INDEX_TYPE>
 void FCyLandSharedBuffers::CreateIndexBuffers(ERHIFeatureLevel::Type InFeatureLevel, bool bRequiresAdjacencyInformation)
 {
-	UE_LOG(LogCyLand, Warning, TEXT("ACyLand CreateIndexBuffers"));
+	//UE_LOG(LogCyLand, Warning, TEXT("ACyLand CreateIndexBuffers"));
 	if (InFeatureLevel <= ERHIFeatureLevel::ES3_1)
 	{
 		if (!bVertexScoresComputed)
@@ -3641,7 +3640,7 @@ void FCyLandVertexFactory::InitRHI()
 FCyLandVertexFactory::FCyLandVertexFactory(ERHIFeatureLevel::Type InFeatureLevel)
 	: FVertexFactory(InFeatureLevel)
 {
-	UE_LOG(LogCyLand, Warning, TEXT("FCyLandVertexFactory onConstruct"));
+	//UE_LOG(LogCyLand, Warning, TEXT("FCyLandVertexFactory onConstruct"));
 }
 
 FVertexFactoryShaderParameters* FCyLandVertexFactory::ConstructShaderParameters(EShaderFrequency ShaderFrequency)
@@ -3665,7 +3664,8 @@ void FCyLandVertexFactory::ModifyCompilationEnvironment(const FVertexFactoryType
 }
 
 
-IMPLEMENT_VERTEX_FACTORY_TYPE(FCyLandVertexFactory, "/Engine/Private/LandscapeVertexFactory.ush", true, true, true, false, false);
+IMPLEMENT_VERTEX_FACTORY_TYPE(FCyLandVertexFactory, "/Project/Private/LandscapeVertexFactory.ush", true, true, true, false, false);
+//IMPLEMENT_VERTEX_FACTORY_TYPE(FCyLandVertexFactory, "/Engine/Private/LandscapeVertexFactory.ush", true, true, true, false, false);
 
 /**
 * Copy the data from another vertex factory
@@ -3694,7 +3694,8 @@ void FCyLandXYOffsetVertexFactory::ModifyCompilationEnvironment(const FVertexFac
 	OutEnvironment.SetDefine(TEXT("LANDSCAPE_XYOFFSET"), TEXT("1"));
 }
 
-IMPLEMENT_VERTEX_FACTORY_TYPE(FCyLandXYOffsetVertexFactory, "/Engine/Private/LandscapeVertexFactory.ush", true, true, true, false, false);
+IMPLEMENT_VERTEX_FACTORY_TYPE(FCyLandXYOffsetVertexFactory, "/Project/Private/LandscapeVertexFactory.ush", true, true, true, false, false);
+//IMPLEMENT_VERTEX_FACTORY_TYPE(FCyLandXYOffsetVertexFactory, "/Engine/Private/LandscapeVertexFactory.ush", true, true, true, false, false);
 
 /** UCyLandMaterialInstanceConstant */
 UCyLandMaterialInstanceConstant::UCyLandMaterialInstanceConstant(const FObjectInitializer& ObjectInitializer)

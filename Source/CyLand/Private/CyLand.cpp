@@ -973,16 +973,17 @@ ACyLand* ACyLandStreamingProxy::GetCyLandActor()
 	return CyLandActor.Get();
 }
 
-#if WITH_EDITOR
+//#if WITH_EDITOR
 UCyLandInfo* ACyLandProxy::CreateCyLandInfo()
 {
+	UE_LOG(LogCyLand, Display, TEXT("Creating CyLandInfo !!!"));
 	UCyLandInfo* CyLandInfo = nullptr;
 
-	check(GIsEditor);
+	//check(GIsEditor);
 	check(CyLandGuid.IsValid());
 	UWorld* OwningWorld = GetWorld();
 	check(OwningWorld);
-	check(!OwningWorld->IsGameWorld());
+	//check(!OwningWorld->IsGameWorld());
 	
 	auto& CyLandInfoMap = UCyLandInfoMap::GetCyLandInfoMap(OwningWorld);
 	CyLandInfo = CyLandInfoMap.Map.FindRef(CyLandGuid);
@@ -1004,21 +1005,21 @@ UCyLandInfo* ACyLandProxy::GetCyLandInfo() const
 {
 	UCyLandInfo* CyLandInfo = nullptr;
 
-	check(GIsEditor);
+	//check(GIsEditor);
 
 	//UE_LOG(LogCyLand, Warning, TEXT("why fatal ACyLand PostLoad"));
 	//fatal
 	check(CyLandGuid.IsValid());
 	UWorld* OwningWorld = GetWorld();
-	if(CyLandGuid.IsValid())
-	if (OwningWorld != nullptr && !OwningWorld->IsGameWorld())
+	//if(CyLandGuid.IsValid())
+	if (OwningWorld != nullptr)// && !OwningWorld->IsGameWorld()
 	{
 		auto& CyLandInfoMap = UCyLandInfoMap::GetCyLandInfoMap(OwningWorld);
 		CyLandInfo = CyLandInfoMap.Map.FindRef(CyLandGuid);
 	}
 	return CyLandInfo;
 }
-#endif
+//#endif
 
 ACyLand* UCyLandComponent::GetCyLandActor() const
 {
@@ -2276,7 +2277,7 @@ ACyLandProxy* UCyLandInfo::GetCyLandProxy() const
 	// so it doesn't really matter which proxy we return here
 
 	// prefer CyLandActor in case it is loaded
-	if (CyLandActor.IsValid())
+	if (CyLandActor && CyLandActor.IsValid())
 	{
 		ACyLand* CyLand = CyLandActor.Get();
 		if (CyLand != nullptr &&
@@ -2437,12 +2438,13 @@ void UCyLandInfo::RegisterActorComponent(UCyLandComponent* Component, bool bMapC
 	{
 		return;
 	}
+	UE_LOG(LogCyLand, Warning, TEXT("RegisterActorComponent sec %s"), *Component->GetSectionBase().ToString());
 
 	check(Component);
 
 	FIntPoint ComponentKey = Component->GetSectionBase() / Component->ComponentSizeQuads;
 	auto RegisteredComponent = XYtoComponentMap.FindRef(ComponentKey);
-
+	//if (true) return;
 	if (RegisteredComponent != Component)
 	{
 		if (RegisteredComponent == nullptr)

@@ -838,6 +838,10 @@ public:
 	virtual bool IsReadyForFinishDestroy() override;
 	virtual void FinishDestroy() override;
 
+
+	CYLAND_API UCyLandInfo* CreateCyLandInfo();
+	CYLAND_API UCyLandInfo* GetCyLandInfo() const;
+
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual void PostEditImport() override;
@@ -848,8 +852,6 @@ public:
 	CYLAND_API static UCyLandLayerInfoObject* CreateLayerInfo(const TCHAR* LayerName, ULevel* Level);
 	CYLAND_API UCyLandLayerInfoObject* CreateLayerInfo(const TCHAR* LayerName);
 
-	CYLAND_API UCyLandInfo* CreateCyLandInfo();
-	CYLAND_API UCyLandInfo* GetCyLandInfo() const;
 
 	// Get CyLand Material assigned to this CyLand
 	virtual UMaterialInterface* GetCyLandMaterial(int8 InLODIndex = INDEX_NONE) const;
@@ -957,7 +959,7 @@ public:
 	*									   Note that using RTF_RGBA16f with InImportHeightFromRGChannel == false, could have precision loss
 	* Only works in the editor
 	*/
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "CyLand Import Heightmap from RenderTarget", Keywords = "Push RenderTarget to CyLand Heightmap", UnsafeDuringActorConstruction = "true"), Category = Rendering)
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "CyLand Import Heightmap from RenderTarget", Keywords = "Push RenderTarget to CyLand Heightmap"), Category = Rendering)//, UnsafeDuringActorConstruction = "true"
 	bool CyLandImportHeightmapFromRenderTarget(UTextureRenderTarget2D* InRenderTarget, bool InImportHeightFromRGChannel = false);
 
 	/**
@@ -992,4 +994,11 @@ protected:
 	
 	CYLAND_API void SetupProceduralLayers(int32 InNumComponentsX = INDEX_NONE, int32 InNumComponentsY = INDEX_NONE);
 #endif
+
+public:
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "CyLand Import Heightmap from RenderTarget2", Keywords = "Push RenderTarget to CyLand Heightmap"), Category = Rendering)//, UnsafeDuringActorConstruction = "true"
+		bool CyLandImportHeightmapFromRenderTargetmy(UTextureRenderTarget2D* InRenderTarget, bool InImportHeightFromRGChannel = false);
+
+
 };

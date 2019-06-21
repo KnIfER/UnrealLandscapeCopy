@@ -218,7 +218,7 @@ private:
 	FShaderParameter TransformParam;
 };
 
-IMPLEMENT_GLOBAL_SHADER(FCyLandProceduralVS, "/Engine/Private/LandscapeProceduralVS.usf", "VSMain", SF_Vertex);
+IMPLEMENT_GLOBAL_SHADER(FCyLandProceduralVS, "/Project/Private/LandscapeProceduralVS.usf", "VSMain", SF_Vertex);
 
 struct FCyLandHeightmapProceduralShaderParameters
 {
@@ -329,7 +329,7 @@ private:
 	FShaderParameter ComponentVertexCountParam;
 };
 
-IMPLEMENT_GLOBAL_SHADER(FCyLandHeightmapProceduralPS, "/Engine/Private/LandscapeProceduralPS.usf", "PSMain", SF_Pixel);
+IMPLEMENT_GLOBAL_SHADER(FCyLandHeightmapProceduralPS, "/Project/Private/LandscapeProceduralPS.usf", "PSMain", SF_Pixel);
 
 class FCyLandHeightmapMipsProceduralPS : public FGlobalShader
 {
@@ -387,7 +387,7 @@ private:
 	FShaderParameter CurrentMipComponentVertexCountParam;
 };
 
-IMPLEMENT_GLOBAL_SHADER(FCyLandHeightmapMipsProceduralPS, "/Engine/Private/LandscapeProceduralPS.usf", "PSMainMips", SF_Pixel);
+IMPLEMENT_GLOBAL_SHADER(FCyLandHeightmapMipsProceduralPS, "/Project/Private/LandscapeProceduralPS.usf", "PSMainMips", SF_Pixel);
 
 /** The filter vertex declaration resource type. */
 

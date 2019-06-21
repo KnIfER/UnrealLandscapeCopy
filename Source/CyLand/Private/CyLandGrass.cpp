@@ -264,7 +264,7 @@ public:
 	}
 };
 
-IMPLEMENT_MATERIAL_SHADER_TYPE(, FCyLandGrassWeightVS, TEXT("/Engine/Private/LandscapeGrassWeight.usf"), TEXT("VSMain"), SF_Vertex);
+IMPLEMENT_MATERIAL_SHADER_TYPE(, FCyLandGrassWeightVS, TEXT("/Project/Private/LandscapeGrassWeight.usf"), TEXT("VSMain"), SF_Vertex);
 
 class FCyLandGrassWeightPS : public FMeshMaterialShader
 {
@@ -310,7 +310,7 @@ public:
 	}
 };
 
-IMPLEMENT_MATERIAL_SHADER_TYPE(, FCyLandGrassWeightPS, TEXT("/Engine/Private/LandscapeGrassWeight.usf"), TEXT("PSMain"), SF_Pixel);
+IMPLEMENT_MATERIAL_SHADER_TYPE(, FCyLandGrassWeightPS, TEXT("/Project/Private/LandscapeGrassWeight.usf"), TEXT("PSMain"), SF_Pixel);
 
 class FCyLandGrassWeightMeshProcessor : public FMeshPassProcessor
 {

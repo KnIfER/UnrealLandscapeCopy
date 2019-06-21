@@ -1156,7 +1156,7 @@ void UCyLandHeightfieldCollisionComponent::UpdateHeightfieldRegion(int32 Compone
 			SubDesc.samples.stride = sizeof(PxU32);
 			SubDesc.flags = PxHeightFieldFlag::eNO_BOUNDARY_EDGES;
 	
-			HeightfieldRef->RBHeightfieldEd->modifySamples(HeightfieldX1, HeightfieldY1, SubDesc, true);
+			//HeightfieldRef->RBHeightfieldEd->modifySamples(HeightfieldX1, HeightfieldY1, SubDesc, true);
 	
 			//
 			// Reset geometry of heightfield shape. Required by the modifySamples

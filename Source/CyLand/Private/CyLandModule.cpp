@@ -19,7 +19,7 @@
 #include "CyLandProxy.h"
 #include "CyLand.h"
 #include "Engine/Texture2D.h"
-
+#include "Misc/Paths.h"
 
 DEFINE_LOG_CATEGORY_STATIC(CYLOG, Warning, All);
 
@@ -225,6 +225,9 @@ void WorldDuplicateEventFunction(UWorld* World, bool bDuplicateForPIE, TMap<UObj
 
 void FCyLandModule::StartupModule()
 {
+	FString PluginShaderDir = FPaths::Combine(FPaths::ProjectDir(), TEXT("Shaders"));
+	UE_LOG(CYLOG, Log, TEXT("StartupModuleStartupModuleStartupModule %s"),*PluginShaderDir);
+	AddShaderSourceDirectoryMapping(TEXT("/Project"), PluginShaderDir);
 	// This code will execute after your module is loaded into memory (but after global variables are initialized, of course.)
 	UMaterialInstance::CustomStaticParametersGetters.AddStatic(
 		&CyLandMaterialsParameterValuesGetter
@@ -262,6 +265,8 @@ void FCyLandModule::ShutdownModule()
 	// we call this function before unloading the module.
 }
 
-//IMPLEMENT_MODULE(FCyLandModule, CyLand, "Cyber Land");
+//IMPLEMENT_MODULE(FCyLandModule, CyLand);
 
-IMPLEMENT_PRIMARY_GAME_MODULE(FDefaultGameModuleImpl, CyLand, "CyLand" );
+//IMPLEMENT_PRIMARY_GAME_MODULE(FCyLandModule, CyLand, "CyLand" );
+
+IMPLEMENT_GAME_MODULE(FCyLandModule, CyLand);

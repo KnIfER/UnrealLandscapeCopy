@@ -246,6 +246,8 @@ EVisibility FCyLandEditorDetailCustomization_MiscTools::GetClearComponentSelecti
 	return EVisibility::Collapsed;
 }
 
+DEFINE_LOG_CATEGORY_STATIC(LogCyLandEditor, Warning, All);
+
 FReply FCyLandEditorDetailCustomization_MiscTools::OnClearComponentSelectionButtonClicked()
 {
 	FEdModeCyLand* CyLandEdMode = GetEditorMode();
@@ -257,6 +259,21 @@ FReply FCyLandEditorDetailCustomization_MiscTools::OnClearComponentSelectionButt
 			FScopedTransaction Transaction(LOCTEXT("Component.Undo_ClearSelected", "Clearing Selection"));
 			CyLandInfo->Modify();
 			CyLandInfo->ClearSelectedRegion(true);
+			auto saoruande = CyLandInfo->GetCyLandProxy();
+			if (saoruande) {
+				UE_LOG(LogCyLandEditor, Warning, TEXT("ACyLand ahha %d"), saoruande->CollisionComponents.Num());
+				//saoruande->CollisionComponents[0]->AddRelativeRotation(FRotator(10, 10, 45));
+				FVector CompXY(0, 0, 0);
+				int step = saoruande->ComponentSizeQuads;
+				for (int j = 0; j < 2; j++)
+				for (int i = 0; i < saoruande->CyLandComponents.Num()/2; i++)
+				{
+					//UE_LOG(LogCyLandEditor, Warning, TEXT("ACyLand ahha %s"), *saoruande->CyLandComponents[i]->GetComponentLocation().ToString());
+			
+					saoruande->CyLandComponents[j * saoruande->CyLandComponents.Num() / 2 +i]->SetRelativeLocation((CompXY + FVector(1, 0, 0) * i + FVector(0, 1, 0) * j) * step);
+					//saoruande->CyLandComponents[i]->SetRelativeLocation(FVector(1,0,0));
+				}
+			}
 		}
 	}
 

@@ -5987,4 +5987,187 @@ bool ACyLandProxy::CyLandExportWeightmapToRenderTarget(UTextureRenderTarget2D* I
 
 #endif //WITH_EDITOR
 
+
+bool ACyLandProxy::CyLandImportHeightmapFromRenderTargetmy(UTextureRenderTarget2D* InRenderTarget, bool InImportHeightFromRGChannel)
+{
+	uint64 StartCycle = FPlatformTime::Cycles64();
+
+	ACyLand* CyLand = GetCyLandActor();
+	if (CyLand == nullptr)
+	{
+		FMessageLog("Blueprint").Error(LOCTEXT("CyLandImportHeightmapFromRenderTarget_NullCyLand", "CyLandImportHeightmapFromRenderTarget: CyLand must be non-null."));
+		return false;
+	}
+
+	int32 MinX, MinY, MaxX, MaxY;
+	UCyLandInfo* CyLandInfo = CyLand->GetCyLandInfo();
+
+	//if (!CyLandInfo->GetCyLandExtent(MinX, MinY, MaxX, MaxY))
+	//{
+	//	FMessageLog("Blueprint").Error(LOCTEXT("CyLandImportHeightmapFromRenderTarget_InvalidCyLandExtends", "CyLandImportHeightmapFromRenderTarget: The landscape min extends are invalid."));
+	//	return false;
+	//}
+	if (!CyLandInfo) {
+		CyLandInfo = CyLand->CreateCyLandInfo();
+		CyLandInfo->ComponentNumSubsections = CyLand->NumSubsections;
+		CyLandInfo->ComponentSizeQuads = CyLand->ComponentSizeQuads;
+		CyLandInfo->SubsectionSizeQuads = CyLand->SubsectionSizeQuads;
+		CyLandInfo->DrawScale = CyLand->GetActorScale();
+		CyLandInfo->CyLandGuid = CyLand->GetCyLandGuid();
+		CyLandInfo->CyLandActor = CyLand;
+	}
+
+	MinX = MAX_int32;
+	MinY = MAX_int32;
+	MaxX = MIN_int32;
+	MaxY = MIN_int32;
+	for (auto component : CyLand->CyLandComponents) {
+		component->GetComponentExtent(MinX, MinY, MaxX, MaxY);
+		if(MinX == MAX_int32)
+		{
+			FMessageLog("Blueprint").Error(LOCTEXT("CyLandImportHeightmapFromRenderTarget_InvalidCyLandExtends", "CyLandImportHeightmapFromRenderTarget: The landscape min extends are invalid."));
+			return false;
+		}
+	}
+
+	if (InRenderTarget == nullptr || InRenderTarget->Resource == nullptr)
+	{
+		FMessageLog("Blueprint").Error(LOCTEXT("CyLandImportHeightmapFromRenderTarget_InvalidRT", "CyLandImportHeightmapFromRenderTarget: Render Target must be non null and not released."));
+		return false;
+	}
+
+	FTextureRenderTargetResource* RenderTargetResource = InRenderTarget->GameThread_GetRenderTargetResource();
+	FIntRect SampleRect = FIntRect(0, 0, FMath::Min(1 + MaxX - MinX, InRenderTarget->SizeX), FMath::Min(1 + MaxY - MinY, InRenderTarget->SizeY));
+
+	TArray<uint16> HeightData;
+
+	switch (InRenderTarget->RenderTargetFormat)
+	{
+	case RTF_RGBA16f:
+	case RTF_RGBA32f:
+	{
+		TArray<FLinearColor> OutputRTHeightmap;
+		OutputRTHeightmap.Reserve(SampleRect.Width() * SampleRect.Height());
+
+		RenderTargetResource->ReadLinearColorPixels(OutputRTHeightmap, FReadSurfaceDataFlags(RCM_MinMax, CubeFace_MAX), SampleRect);
+		HeightData.Reserve(OutputRTHeightmap.Num());
+
+		for (auto LinearColor : OutputRTHeightmap)
+		{
+			if (InImportHeightFromRGChannel)
+			{
+				FColor Color = LinearColor.ToFColor(false);
+				uint16 Height = ((Color.R << 8) | Color.G);
+				HeightData.Add(Height);
+			}
+			else
+			{
+				HeightData.Add((uint16)LinearColor.R);
+			}
+		}
+	}
+	break;
+
+	case RTF_RGBA8:
+	{
+		TArray<FColor> OutputRTHeightmap;
+		OutputRTHeightmap.Reserve(SampleRect.Width() * SampleRect.Height());
+
+		RenderTargetResource->ReadPixels(OutputRTHeightmap, FReadSurfaceDataFlags(RCM_MinMax, CubeFace_MAX), SampleRect);
+		HeightData.Reserve(OutputRTHeightmap.Num());
+
+		for (FColor Color : OutputRTHeightmap)
+		{
+			uint16 Height = ((Color.R << 8) | Color.G);
+			HeightData.Add(Height);
+		}
+	}
+	break;
+
+	default:
+	{
+		FMessageLog("Blueprint").Error(LOCTEXT("CyLandImportHeightmapFromRenderTarget_InvalidRTFormat", "CyLandImportHeightmapFromRenderTarget: The Render Target format is invalid. We only support RTF_RGBA16f, RTF_RGBA32f, RTF_RGBA8"));
+		return false;
+	}
+	}
+
+	FScopedTransaction Transaction(LOCTEXT("Undo_ImportHeightmap", "Importing CyLand Heightmap"));
+
+	FHeightmapAccessor<false> HeightmapAccessor(CyLandInfo);
+	HeightmapAccessor.SetData(MinX, MinY, SampleRect.Width() - 1, SampleRect.Height() - 1, HeightData.GetData());
+
+	double SecondsTaken = FPlatformTime::ToSeconds64(FPlatformTime::Cycles64() - StartCycle);
+	UE_LOG(LogCyLandBP, Display, TEXT("Took %f seconds to import heightmap from render target."), SecondsTaken);
+
+	return true;
+}
+
+template<bool bInUseInterp>
+void FHeightmapAccessor<bInUseInterp>::SetData(const ACyLand& land, int32 X1, int32 Y1, int32 X2, int32 Y2, const uint16* Data, ECyLandLayerPaintingRestriction PaintingRestriction)
+{
+	TSet<UCyLandComponent*> Components;
+	for (auto comp : land.CyLandComponents) {
+		Components.Add(comp);
+	}
+	if (CyLandInfo)
+	{
+		// Update data
+		ChangedComponents.Append(Components);
+
+		for (UCyLandComponent* Component : Components)
+		{
+			Component->InvalidateLightingCache();
+		}
+
+		// Flush dynamic foliage (grass)
+		ACyLandProxy::InvalidateGeneratedComponentData(Components);
+
+		// Notify foliage to move any attached instances
+		bool bUpdateFoliage = false;
+		for (UCyLandComponent* Component : Components)
+		{
+			UCyLandHeightfieldCollisionComponent* CollisionComponent = Component->CollisionComponent.Get();
+			if (CollisionComponent && AInstancedFoliageActor::HasFoliageAttached(CollisionComponent))
+			{
+				bUpdateFoliage = true;
+				break;
+			}
+		}
+
+		if (bUpdateFoliage)
+		{
+			// Calculate landscape local-space bounding box of old data, to look for foliage instances.
+			TArray<UCyLandHeightfieldCollisionComponent*> CollisionComponents;
+			CollisionComponents.Empty(Components.Num());
+			TArray<FBox> PreUpdateLocalBoxes;
+			PreUpdateLocalBoxes.Empty(Components.Num());
+
+			for (UCyLandComponent* Component : Components)
+			{
+				UCyLandHeightfieldCollisionComponent* CollisionComponent = Component->CollisionComponent.Get();
+				if (CollisionComponent)
+				{
+					CollisionComponents.Add(CollisionComponent);
+					PreUpdateLocalBoxes.Add(FBox(FVector((float)X1, (float)Y1, Component->CachedLocalBox.Min.Z), FVector((float)X2, (float)Y2, Component->CachedLocalBox.Max.Z)));
+				}
+			}
+
+			// Update landscape.
+			CyLandEdit->SetHeightData(X1, Y1, X2, Y2, Data, 0, true);
+
+			// Snap foliage for each component.
+			for (int32 Index = 0; Index < CollisionComponents.Num(); ++Index)
+			{
+				UCyLandHeightfieldCollisionComponent* CollisionComponent = CollisionComponents[Index];
+				CollisionComponent->SnapFoliageInstances(PreUpdateLocalBoxes[Index].TransformBy(CyLandInfo->GetCyLandProxy()->CyLandActorToWorld().ToMatrixWithScale()).ExpandBy(1.0f));
+			}
+		}
+		else
+		{
+			// No foliage, just update landscape.
+			CyLandEdit->SetHeightData(X1, Y1, X2, Y2, Data, 0, true);
+		}
+	}
+}
+
 #undef LOCTEXT_NAMESPACE

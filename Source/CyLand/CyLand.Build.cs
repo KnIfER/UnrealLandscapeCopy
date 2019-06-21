@@ -81,7 +81,7 @@ public class CyLand : ModuleRules
                     "Renderer",
                 }
             );
-        PrivateDependencyModuleNames.Add("CyLandEditor");
+        //PrivateDependencyModuleNames.Add("CyLandEditor");
         PrivateDependencyModuleNames.AddRange(new string[] {
                     "MeshDescription",
                     "MeshUtilitiesCommon"
@@ -97,12 +97,6 @@ public class CyLand : ModuleRules
                 }
             );
 
-        CircularlyReferencedDependentModules.AddRange(
-            new string[] {
-                    "UnrealEd",
-                    "MaterialUtilities",
-            }
-        );
 
         // Uncomment if you are using Slate UI
         // PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

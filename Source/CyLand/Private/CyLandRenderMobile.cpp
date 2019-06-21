@@ -242,7 +242,7 @@ FVertexFactoryShaderParameters* FCyLandVertexFactoryMobile::ConstructShaderParam
 	}
 }
 
-IMPLEMENT_VERTEX_FACTORY_TYPE(FCyLandVertexFactoryMobile, "/Engine/Private/LandscapeVertexFactory.ush", true, true, true, false, false);
+IMPLEMENT_VERTEX_FACTORY_TYPE(FCyLandVertexFactoryMobile, "/Project/Private/LandscapeVertexFactory.ush", true, true, true, false, false);
 
 /**
 * Initialize the RHI for this rendering resource
