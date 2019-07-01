@@ -28,12 +28,8 @@ void VSMain(
 	)
 {
 	ResolvedView = ResolveView();
-	FVertexFactoryIntermediates VFIntermediates;
-	VFIntermediates.InputPosition = Input.Position;
-	VFIntermediates.LocalPosition = Input.Position;
-	VFIntermediates.WorldNormal = float3(0,0,1);
 
-	//FVertexFactoryIntermediates VFIntermediates = GetVertexFactoryIntermediates(Input);
+	FVertexFactoryIntermediates VFIntermediates = GetVertexFactoryIntermediates(Input);
 	float4 WorldPositionExcludingWPO = VertexFactoryGetWorldPosition(Input, VFIntermediates);
 	float4 WorldPosition = WorldPositionExcludingWPO;
 	float4 RasterizedWorldPosition = VertexFactoryGetRasterizedWorldPosition(Input, VFIntermediates, WorldPosition);

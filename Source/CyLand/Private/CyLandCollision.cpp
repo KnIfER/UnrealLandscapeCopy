@@ -75,7 +75,7 @@ TMap<FGuid, UCyLandHeightfieldCollisionComponent::FPhysXHeightfieldRef* > GShare
 UCyLandHeightfieldCollisionComponent::FPhysXHeightfieldRef::~FPhysXHeightfieldRef()
 {
 #if WITH_PHYSX
-	// CyFree the existing heightfield data.
+	// Free the existing heightfield data.
 	if (RBHeightfield)
 	{
 		GPhysXPendingKillHeightfield.Add(RBHeightfield);
@@ -99,7 +99,7 @@ TMap<FGuid, UCyLandMeshCollisionComponent::FPhysXMeshRef* > GSharedMeshRefs;
 UCyLandMeshCollisionComponent::FPhysXMeshRef::~FPhysXMeshRef()
 {
 #if WITH_PHYSX
-	// CyFree the existing heightfield data.
+	// Free the existing heightfield data.
 	if (RBTriangleMesh)
 	{
 		GPhysXPendingKillTriMesh.Add(RBTriangleMesh);

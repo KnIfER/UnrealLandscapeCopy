@@ -36,7 +36,7 @@
 #include "AssetRegistryModule.h"
 
 #include "CyLandRender.h"
-#include "Materials/MaterialExpressionCyLandVisibilityMask.h"
+#include "Landscape/Classes/Materials/MaterialExpressionLandscapeVisibilityMask.h"
 #include "CyLandEdit.h"
 #include "IDetailGroup.h"
 #include "Widgets/SBoxPanel.h"
@@ -142,7 +142,7 @@ bool FCyLandEditorDetailCustomization_TargetLayers::ShouldShowVisibilityTip()
 			{
 				HoleMaterial = Proxy->GetCyLandMaterial();
 			}
-			if (!HoleMaterial->GetMaterial()->HasAnyExpressionsInMaterialAndFunctionsOfType<UMaterialExpressionCyLandVisibilityMask>())
+			if (!HoleMaterial->GetMaterial()->HasAnyExpressionsInMaterialAndFunctionsOfType<UMaterialExpressionLandscapeVisibilityMask>())
 			{
 				return true;
 			}

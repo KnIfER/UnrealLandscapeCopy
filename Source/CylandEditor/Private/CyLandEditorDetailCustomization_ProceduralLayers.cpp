@@ -36,7 +36,7 @@
 #include "AssetRegistryModule.h"
 
 #include "CyLandRender.h"
-#include "Materials/MaterialExpressionCyLandVisibilityMask.h"
+//#include "Materials/MaterialExpressionLandscapeVisibilityMask.h"
 #include "CyLandEdit.h"
 #include "IDetailGroup.h"
 #include "Widgets/SBoxPanel.h"

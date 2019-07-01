@@ -797,7 +797,7 @@ FReply FCyLandEditorDetailCustomization_NewCyLand::OnCreateButtonClicked()
 		{
 			return FReply::Handled();
 		}
-
+		UE_LOG(NewCyLand, Warning, TEXT("create NewCyLand offset ?? %d"), ImportLayers.GetValue().Num());
 		TArray<uint16> Data = FNewCyLandUtils::ComputeHeightData( CyLandEdMode->UISettings, ImportLayers.GetValue(), CyLandEdMode->NewCyLandPreviewMode );
 
 		FScopedTransaction Transaction(LOCTEXT("Undo", "Creating New CyLand"));

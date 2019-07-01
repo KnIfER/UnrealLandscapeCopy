@@ -19,7 +19,7 @@ class FMeshMapBuildData;
 class FPrimitiveSceneProxy;
 class ITargetPlatform;
 class UCyLandComponent;
-class UCyLandGrassType;
+class ULandscapeGrassType;
 class UCyLandHeightfieldCollisionComponent;
 class UCyLandInfo;
 class UCyLandLayerInfoObject;
@@ -214,7 +214,7 @@ struct FCyLandComponentGrassData
 	// Height data for LODs 1+, keyed on LOD index
 	TMap<int32, TArray<uint16>> HeightMipData;
 #endif
-	TMap<UCyLandGrassType*, TArray<uint8>> WeightData;
+	TMap<ULandscapeGrassType*, TArray<uint8>> WeightData;
 
 	FCyLandComponentGrassData() {}
 

@@ -12,7 +12,7 @@ CyLandRender.cpp: New terrain rendering
 #include "CyLandMeshProxyComponent.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialExpressionTextureCoordinate.h"
-#include "Materials/MaterialExpressionCyLandLayerCoords.h"
+#include "Materials/MaterialExpressionLandscapeLayerCoords.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "ShaderParameterUtils.h"
@@ -993,7 +993,7 @@ FCyLandComponentSceneProxy::~FCyLandComponentSceneProxy()
 {
 	UnregisterNeighbors();
 
-	// CyFree the subsection uniform buffer
+	// Free the subsection uniform buffer
 	CyLandCyUniformShaderParameters.ReleaseResource();
 
 	if (SharedBuffers)
@@ -4149,7 +4149,7 @@ void UCyLandComponent::GetStreamingTextureInfo(FStreamingTextureLevelContext& Le
 					if (TextureSample && TextureSample->Coordinates.IsConnected())
 					{
 						UMaterialExpressionTextureCoordinate* TextureCoordinate = nullptr;
-						UMaterialExpressionCyLandLayerCoords* TerrainTextureCoordinate = nullptr;
+						UMaterialExpressionLandscapeLayerCoords* TerrainTextureCoordinate = nullptr;
 
 						for (UMaterialExpression* FindExp : Material->Expressions)
 						{
@@ -4158,7 +4158,7 @@ void UCyLandComponent::GetStreamingTextureInfo(FStreamingTextureLevelContext& Le
 								TextureCoordinate = Cast<UMaterialExpressionTextureCoordinate>(FindExp);
 								if (!TextureCoordinate)
 								{
-									TerrainTextureCoordinate = Cast<UMaterialExpressionCyLandLayerCoords>(FindExp);
+									TerrainTextureCoordinate = Cast<UMaterialExpressionLandscapeLayerCoords>(FindExp);
 								}
 								break;
 							}

@@ -19,7 +19,7 @@ class ACyLand;
 class ACyLandProxy;
 class UHierarchicalInstancedStaticMeshComponent;
 class UCyLandComponent;
-class UCyLandGrassType;
+class ULandscapeGrassType;
 class UCyLandHeightfieldCollisionComponent;
 class UCyLandInfo;
 class UCyLandLayerInfoObject;
@@ -226,7 +226,7 @@ struct FCachedCyLandFoliage
 	struct FGrassCompKey
 	{
 		TWeakObjectPtr<UCyLandComponent> BasedOn;
-		TWeakObjectPtr<UCyLandGrassType> GrassType;
+		TWeakObjectPtr<ULandscapeGrassType> GrassType;
 		int32 SqrtSubsections;
 		int32 CachedMaxInstancesPerComponent;
 		int32 SubsectionX;
@@ -802,14 +802,14 @@ public:
 
 
 	/* Get the list of grass types on this landscape */
-	TArray<UCyLandGrassType*> GetGrassTypes() const;
+	TArray<ULandscapeGrassType*> GetGrassTypes() const;
 
 	/* Invalidate the precomputed grass and baked texture data for the specified components */
 	CYLAND_API static void InvalidateGeneratedComponentData(const TSet<UCyLandComponent*>& Components);
 
 #if WITH_EDITOR
 	/** Render grass maps for the specified components */
-	void RenderGrassMaps(const TArray<UCyLandComponent*>& CyLandComponents, const TArray<UCyLandGrassType*>& GrassTypes);
+	void RenderGrassMaps(const TArray<UCyLandComponent*>& CyLandComponents, const TArray<ULandscapeGrassType*>& GrassTypes);
 
 	/** Update any textures baked from the landscape as necessary */
 	void UpdateBakedTextures();

@@ -34,8 +34,8 @@
 #include "MeshMaterialShaderType.h"
 #include "MeshMaterialShader.h"
 #include "Materials/Material.h"
-#include "CyLandGrassType.h"
-#include "Materials/MaterialExpressionCyLandGrassOutput.h"
+#include "Landscape/Classes/LandscapeGrassType.h"
+#include "Landscape/Classes/Materials/MaterialExpressionLandscapeGrassOutput.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "ContentStreaming.h"
 #include "CyLandDataAccess.h"
@@ -531,11 +531,11 @@ class FCyLandGrassWeightExporter : public FCyLandGrassWeightExporter_RenderThrea
 	int32 ComponentSizeVerts;
 	int32 SubsectionSizeQuads;
 	int32 NumSubsections;
-	TArray<UCyLandGrassType*> GrassTypes;
+	TArray<ULandscapeGrassType*> GrassTypes;
 	UTextureRenderTarget2D* RenderTargetTexture;
 
 public:
-	FCyLandGrassWeightExporter(ACyLandProxy* InCyLandProxy, const TArray<UCyLandComponent*>& InCyLandComponents, TArray<UCyLandGrassType*> InGrassTypes, bool InbNeedsHeightmap = true, TArray<int32> InHeightMips = {})
+	FCyLandGrassWeightExporter(ACyLandProxy* InCyLandProxy, const TArray<UCyLandComponent*>& InCyLandComponents, TArray<ULandscapeGrassType*> InGrassTypes, bool InbNeedsHeightmap = true, TArray<int32> InHeightMips = {})
 		: FCyLandGrassWeightExporter_RenderThread(
 			InGrassTypes.Num(),
 			InbNeedsHeightmap,
@@ -814,12 +814,12 @@ FCyLandComponentGrassData::FCyLandComponentGrassData(UCyLandComponent* Component
 bool UCyLandComponent::MaterialHasGrass() const
 {
 	UMaterialInterface* Material = GetCyLandMaterial();
-	TArray<const UMaterialExpressionCyLandGrassOutput*> GrassExpressions;
-	Material->GetMaterial()->GetAllExpressionsOfType<UMaterialExpressionCyLandGrassOutput>(GrassExpressions);
+	TArray<const UMaterialExpressionLandscapeGrassOutput*> GrassExpressions;
+	Material->GetMaterial()->GetAllExpressionsOfType<UMaterialExpressionLandscapeGrassOutput>(GrassExpressions);
 	if (GrassExpressions.Num() > 0 &&
 		GrassExpressions[0]->GrassTypes.Num() > 0)
 	{
-		return GrassExpressions[0]->GrassTypes.ContainsByPredicate([](FCyGrassInput& GrassInput) { return (GrassInput.Input.IsConnected() && GrassInput.GrassType); });
+		return GrassExpressions[0]->GrassTypes.ContainsByPredicate([](FGrassInput& GrassInput) { return (GrassInput.Input.IsConnected() && GrassInput.GrassType); });
 	}
 
 	return false;
@@ -863,8 +863,8 @@ bool UCyLandComponent::IsGrassMapOutdated() const
 bool UCyLandComponent::CanRenderGrassMap() const
 {
 	// Check we can render
-	UWorld* ComponentWorld = GetWorld();
-	if (!GIsEditor || GUsingNullRHI || !ComponentWorld || ComponentWorld->IsGameWorld() || ComponentWorld->FeatureLevel < ERHIFeatureLevel::SM4 || !SceneProxy)
+	UWorld* ComponentWorld = GetWorld();//!GIsEditor ||   || ComponentWorld->IsGameWorld() 
+	if (GUsingNullRHI || !ComponentWorld|| ComponentWorld->FeatureLevel < ERHIFeatureLevel::SM4 || !SceneProxy)
 	{
 		return false;
 	}
@@ -916,10 +916,10 @@ void UCyLandComponent::RenderGrassMap()
 	UMaterialInterface* Material = GetCyLandMaterial();
 	if (CanRenderGrassMap())
 	{
-		TArray<UCyLandGrassType*> GrassTypes;
+		TArray<ULandscapeGrassType*> GrassTypes;
 
-		TArray<const UMaterialExpressionCyLandGrassOutput*> GrassExpressions;
-		Material->GetMaterial()->GetAllExpressionsOfType<UMaterialExpressionCyLandGrassOutput>(GrassExpressions);
+		TArray<const UMaterialExpressionLandscapeGrassOutput*> GrassExpressions;
+		Material->GetMaterial()->GetAllExpressionsOfType<UMaterialExpressionLandscapeGrassOutput>(GrassExpressions);
 		if (GrassExpressions.Num() > 0)
 		{
 			GrassTypes.Empty(GrassExpressions[0]->GrassTypes.Num());
@@ -964,7 +964,7 @@ TArray<uint16> UCyLandComponent::RenderWPOHeightmap(int32 LOD)
 		GetMaterialInstance(0)->GetMaterialResource(GetWorld()->FeatureLevel)->FinishCompilation();
 	}
 
-	TArray<UCyLandGrassType*> GrassTypes;
+	TArray<ULandscapeGrassType*> GrassTypes;
 	TArray<UCyLandComponent*> CyLandComponents;
 	CyLandComponents.Add(this);
 
@@ -993,7 +993,7 @@ void UCyLandComponent::RemoveGrassMap()
 	GrassData = MakeShareable(new FCyLandComponentGrassData());
 }
 
-void ACyLandProxy::RenderGrassMaps(const TArray<UCyLandComponent*>& InCyLandComponents, const TArray<UCyLandGrassType*>& GrassTypes)
+void ACyLandProxy::RenderGrassMaps(const TArray<UCyLandComponent*>& InCyLandComponents, const TArray<ULandscapeGrassType*>& GrassTypes)
 {
 	TArray<int32> HeightMips;
 	if (CollisionMipLevel > 0)
@@ -1037,176 +1037,7 @@ public:
 	}
 };
 
-//
-// UMaterialExpressionCyLandGrassOutput
-//
-UMaterialExpressionCyLandGrassOutput::UMaterialExpressionCyLandGrassOutput(const FObjectInitializer& ObjectInitializer)
-: Super(ObjectInitializer)
-{
-	// Structure to hold one-time initialization
-	struct FConstructorStatics
-	{
-		FText STRING_CyLand;
-		FName NAME_Grass;
-		FConstructorStatics()
-			: STRING_CyLand(LOCTEXT("CyLand", "CyLand"))
-			, NAME_Grass("Grass")
-		{
-		}
-	};
-	static FConstructorStatics ConstructorStatics;
 
-#if WITH_EDITORONLY_DATA
-	MenuCategories.Add(ConstructorStatics.STRING_CyLand);
-
-	// No outputs
-	Outputs.Reset();
-#endif
-
-	// Default input
-	new(GrassTypes)FCyGrassInput(ConstructorStatics.NAME_Grass);
-}
-
-#if WITH_EDITOR
-int32 UMaterialExpressionCyLandGrassOutput::Compile(class FMaterialCompiler* Compiler, int32 OutputIndex)
-{
-	if (GrassTypes.IsValidIndex(OutputIndex))
-	{
-		if (GrassTypes[OutputIndex].Input.Expression)
-		{
-			return Compiler->CustomOutput(this, OutputIndex, GrassTypes[OutputIndex].Input.Compile(Compiler));
-		}
-		else
-		{
-			return CompilerError(Compiler, TEXT("Input missing"));
-		}
-	}
-
-	return INDEX_NONE;
-}
-
-void UMaterialExpressionCyLandGrassOutput::GetCaption(TArray<FString>& OutCaptions) const
-{
-	OutCaptions.Add(TEXT("Grass"));
-}
-
-const TArray<FExpressionInput*> UMaterialExpressionCyLandGrassOutput::GetInputs()
-{
-	TArray<FExpressionInput*> OutInputs;
-	for (auto& GrassType : GrassTypes)
-	{
-		OutInputs.Add(&GrassType.Input);
-	}
-	return OutInputs;
-}
-
-FExpressionInput* UMaterialExpressionCyLandGrassOutput::GetInput(int32 InputIndex)
-{
-	return &GrassTypes[InputIndex].Input;
-}
-
-FName UMaterialExpressionCyLandGrassOutput::GetInputName(int32 InputIndex) const
-{
-	return GrassTypes[InputIndex].Name;
-}
-#endif // WITH_EDITOR
-
-bool UMaterialExpressionCyLandGrassOutput::NeedsLoadForClient() const
-{
-	return true;
-}
-
-#if WITH_EDITOR
-void UMaterialExpressionCyLandGrassOutput::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-
-	if (PropertyChangedEvent.MemberProperty)
-	{
-		const FName PropertyName = PropertyChangedEvent.MemberProperty->GetFName();
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(UMaterialExpressionCyLandGrassOutput, GrassTypes))
-		{
-			if (GraphNode)
-			{
-				GraphNode->ReconstructNode();
-			}
-		}
-	}
-}
-#endif
-
-//
-// UCyLandGrassType
-//
-
-UCyLandGrassType::UCyLandGrassType(const FObjectInitializer& ObjectInitializer)
-: Super(ObjectInitializer)
-{
-	GrassDensity_DEPRECATED = 400;
-	StartCullDistance_DEPRECATED = 10000.0f;
-	EndCullDistance_DEPRECATED = 10000.0f;
-	PlacementJitter_DEPRECATED = 1.0f;
-	RandomRotation_DEPRECATED = true;
-	AlignToSurface_DEPRECATED = true;
-	bEnableDensityScaling = true;
-}
-
-void UCyLandGrassType::PostLoad()
-{
-	Super::PostLoad();
-	if (GrassMesh_DEPRECATED && !GrassVarieties.Num())
-	{
-		FCyGrassVariety Grass;
-		Grass.GrassMesh = GrassMesh_DEPRECATED;
-		Grass.GrassDensity = GrassDensity_DEPRECATED;
-		Grass.StartCullDistance = StartCullDistance_DEPRECATED;
-		Grass.EndCullDistance = EndCullDistance_DEPRECATED;
-		Grass.PlacementJitter = PlacementJitter_DEPRECATED;
-		Grass.RandomRotation = RandomRotation_DEPRECATED;
-		Grass.AlignToSurface = AlignToSurface_DEPRECATED;
-
-		GrassVarieties.Add(Grass);
-		GrassMesh_DEPRECATED = nullptr;
-	}
-}
-
-
-#if WITH_EDITOR
-void UCyLandGrassType::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-
-	if (GIsEditor)
-	{
-		for (TObjectIterator<ACyLandProxy> It; It; ++It)
-		{
-			ACyLandProxy* Proxy = *It;
-			if (Proxy->GetWorld() && !Proxy->GetWorld()->IsPlayInEditor())
-			{
-				const UMaterialInterface* MaterialInterface = Proxy->CyLandMaterial;
-				if (MaterialInterface)
-				{
-					TArray<const UMaterialExpressionCyLandGrassOutput*> GrassExpressions;
-					MaterialInterface->GetMaterial()->GetAllExpressionsOfType<UMaterialExpressionCyLandGrassOutput>(GrassExpressions);
-
-					// Should only be one grass type node
-					if (GrassExpressions.Num() > 0)
-					{
-						for (auto& Output : GrassExpressions[0]->GrassTypes)
-						{
-							if (Output.GrassType == this)
-							{
-								Proxy->FlushGrassComponents();
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-}
-#endif
 
 //
 // FCyLandComponentGrassData
@@ -1394,7 +1225,7 @@ struct FGrassBuilderBase
 
 	int32 SqrtMaxInstances;
 
-	FGrassBuilderBase(ACyLandProxy* CyLand, UCyLandComponent* Component, const FCyGrassVariety& GrassVariety, ERHIFeatureLevel::Type FeatureLevel, int32 SqrtSubsections = 1, int32 SubX = 0, int32 SubY = 0, bool bEnableDensityScaling = true)
+	FGrassBuilderBase(ACyLandProxy* CyLand, UCyLandComponent* Component, const FGrassVariety& GrassVariety, ERHIFeatureLevel::Type FeatureLevel, int32 SqrtSubsections = 1, int32 SubX = 0, int32 SubY = 0, bool bEnableDensityScaling = true)
 	{
 		bHaveValidData = true;
 
@@ -1437,7 +1268,7 @@ struct FGrassBuilderBase
 // FCyLandComponentGrassAccess - accessor wrapper for data for one GrassType from one Component
 struct FCyLandComponentGrassAccess
 {
-	FCyLandComponentGrassAccess(const UCyLandComponent* InComponent, const UCyLandGrassType* GrassType)
+	FCyLandComponentGrassAccess(const UCyLandComponent* InComponent, const ULandscapeGrassType* GrassType)
 	: GrassData(InComponent->GrassData)
 	, HeightData(InComponent->GrassData->HeightData)
 	, WeightData(InComponent->GrassData->WeightData.Find(GrassType))
@@ -1488,7 +1319,7 @@ static FORCEINLINE float Halton(uint32 Index)
 struct FAsyncGrassBuilder : public FGrassBuilderBase
 {
 	FCyLandComponentGrassAccess GrassData;
-	ECyGrassScaling Scaling;
+	EGrassScaling Scaling;
 	FFloatInterval ScaleX;
 	FFloatInterval ScaleY;
 	FFloatInterval ScaleZ;
@@ -1521,7 +1352,7 @@ struct FAsyncGrassBuilder : public FGrassBuilderBase
 	TArray<FClusterNode> ClusterTree;
 	int32 OutOcclusionLayerNum;
 
-	FAsyncGrassBuilder(ACyLandProxy* CyLand, UCyLandComponent* Component, const UCyLandGrassType* GrassType, const FCyGrassVariety& GrassVariety, ERHIFeatureLevel::Type FeatureLevel, UHierarchicalInstancedStaticMeshComponent* HierarchicalInstancedStaticMeshComponent, int32 SqrtSubsections, int32 SubX, int32 SubY, uint32 InHaltonBaseIndex, TArray<FBox>& InExcludedBoxes)
+	FAsyncGrassBuilder(ACyLandProxy* CyLand, UCyLandComponent* Component, const ULandscapeGrassType* GrassType, const FGrassVariety& GrassVariety, ERHIFeatureLevel::Type FeatureLevel, UHierarchicalInstancedStaticMeshComponent* HierarchicalInstancedStaticMeshComponent, int32 SqrtSubsections, int32 SubX, int32 SubY, uint32 InHaltonBaseIndex, TArray<FBox>& InExcludedBoxes)
 		: FGrassBuilderBase(CyLand, Component, GrassVariety, FeatureLevel, SqrtSubsections, SubX, SubY, GrassType->bEnableDensityScaling)
 		, GrassData(Component, GrassType)
 		, Scaling(GrassVariety.Scaling)
@@ -1541,7 +1372,7 @@ struct FAsyncGrassBuilder : public FGrassBuilderBase
 		, TotalInstances(0)
 		, HaltonBaseIndex(InHaltonBaseIndex)
 
-		, UseCyLandLightmap(GrassVariety.bUseCyLandLightmap)
+		, UseCyLandLightmap(GrassVariety.bUseLandscapeLightmap)
 		, LightmapBaseBias(FVector2D::ZeroVector)
 		, LightmapBaseScale(FVector2D::UnitVector)
 		, ShadowmapBaseBias(FVector2D::ZeroVector)
@@ -1649,17 +1480,17 @@ struct FAsyncGrassBuilder : public FGrassBuilderBase
 
 		switch (Scaling)
 		{
-		case ECyGrassScaling::CyUniform:
+		case EGrassScaling::Uniform:
 			Result.X = ScaleX.Interpolate(RandomStream.GetFraction());
 			Result.Y = Result.X;
 			Result.Z = Result.X;
 			break;
-		case ECyGrassScaling::CyFree:
+		case EGrassScaling::Free:
 			Result.X = ScaleX.Interpolate(RandomStream.GetFraction());
 			Result.Y = ScaleY.Interpolate(RandomStream.GetFraction());
 			Result.Z = ScaleZ.Interpolate(RandomStream.GetFraction());
 			break;
-		case ECyGrassScaling::CyLockXY:
+		case EGrassScaling::LockXY:
 			Result.X = ScaleX.Interpolate(RandomStream.GetFraction());
 			Result.Y = Result.X;
 			Result.Z = ScaleZ.Interpolate(RandomStream.GetFraction());
@@ -2030,13 +1861,13 @@ void ACyLandProxy::FlushGrassComponents(const TSet<UCyLandComponent*>* OnlyForCo
 	}
 }
 
-TArray<UCyLandGrassType*> ACyLandProxy::GetGrassTypes() const
+TArray<ULandscapeGrassType*> ACyLandProxy::GetGrassTypes() const
 {
-	TArray<UCyLandGrassType*> GrassTypes;
+	TArray<ULandscapeGrassType*> GrassTypes;
 	if (CyLandMaterial)
 	{
-		TArray<const UMaterialExpressionCyLandGrassOutput*> GrassExpressions;
-		CyLandMaterial->GetMaterial()->GetAllExpressionsOfType<UMaterialExpressionCyLandGrassOutput>(GrassExpressions);
+		TArray<const UMaterialExpressionLandscapeGrassOutput*> GrassExpressions;
+		CyLandMaterial->GetMaterial()->GetAllExpressionsOfType<UMaterialExpressionLandscapeGrassOutput>(GrassExpressions);
 		if (GrassExpressions.Num() > 0)
 		{
 			for (auto& Type : GrassExpressions[0]->GrassTypes)
@@ -2096,7 +1927,7 @@ void ACyLandProxy::UpdateGrass(const TArray<FVector>& Cameras, bool bForceSync)
 
 	if (CVarGrassEnable.GetValueOnAnyThread() > 0)
 	{
-		TArray<UCyLandGrassType*> GrassTypes = GetGrassTypes();
+		TArray<ULandscapeGrassType*> GrassTypes = GetGrassTypes();
 
 		float GuardBand = CVarGuardBandMultiplier.GetValueOnAnyThread();
 		float DiscardGuardBand = CVarGuardBandDiscardMultiplier.GetValueOnAnyThread();
@@ -2116,7 +1947,7 @@ void ACyLandProxy::UpdateGrass(const TArray<FVector>& Cameras, bool bForceSync)
 			TSet<UTexture2D*> CurrentForcedStreamedTextures;
 			TSet<UTexture2D*> DesiredForceStreamedTextures;
 
-			if (!World->IsGameWorld())
+			if (true)//!World->IsGameWorld()
 			{
 				// see if we need to flush grass for any components
 				TSet<UCyLandComponent*> FlushComponents;
@@ -2418,7 +2249,7 @@ void ACyLandProxy::UpdateGrass(const TArray<FVector>& Cameras, bool bForceSync)
 										
 										const FMeshMapBuildData* MeshMapBuildData = Component->GetMeshMapBuildData();
 
-										if (GrassVariety.bUseCyLandLightmap
+										if (GrassVariety.bUseLandscapeLightmap
 											&& GrassVariety.GrassMesh->GetNumLODs() > 0
 											&& MeshMapBuildData
 											&& MeshMapBuildData->LightMap)

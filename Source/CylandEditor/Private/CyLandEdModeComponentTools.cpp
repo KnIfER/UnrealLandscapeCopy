@@ -20,7 +20,7 @@
 #include "InstancedFoliageActor.h"
 #include "CyLandEdModeTools.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
-#include "Materials/MaterialExpressionCyLandVisibilityMask.h"
+#include "Landscape/Classes/Materials/MaterialExpressionLandscapeVisibilityMask.h"
 #include "Algo/Copy.h"
 #include "Settings/EditorExperimentalSettings.h"
 
@@ -335,7 +335,7 @@ public:
 		{
 			HoleMaterial = Proxy->GetCyLandMaterial();
 		}
-		if (!HoleMaterial->GetMaterial()->HasAnyExpressionsInMaterialAndFunctionsOfType<UMaterialExpressionCyLandVisibilityMask>())
+		if (!HoleMaterial->GetMaterial()->HasAnyExpressionsInMaterialAndFunctionsOfType<UMaterialExpressionLandscapeVisibilityMask>())
 		{
 			FMessageDialog::Open(EAppMsgType::Ok,
 				LOCTEXT("CyLandVisibilityMaskMissing", "You must add a \"CyLand Visibility Mask\" node to your material before you can paint visibility."));

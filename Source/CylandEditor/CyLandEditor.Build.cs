@@ -28,6 +28,7 @@ public class CyLandEditor : ModuleRules
                 "Foliage",
 				"ViewportInteraction",
 				"VREditor",
+				"Landscape",
 			}
 			);
 

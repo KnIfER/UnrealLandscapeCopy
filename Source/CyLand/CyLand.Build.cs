@@ -79,6 +79,7 @@ public class CyLand : ModuleRules
                     "RenderCore",
                     "RHI",
                     "Renderer",
+                    "Landscape",
                 }
             );
         //PrivateDependencyModuleNames.Add("CyLandEditor");

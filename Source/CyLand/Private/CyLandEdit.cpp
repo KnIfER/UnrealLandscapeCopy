@@ -19,11 +19,11 @@ CyLandEdit.cpp: CyLand editing
 #include "CyLandLayerInfoObject.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialInstanceDynamic.h"
-#include "Materials/MaterialExpressionCyLandVisibilityMask.h"
-#include "Materials/MaterialExpressionCyLandLayerWeight.h"
-#include "Materials/MaterialExpressionCyLandLayerSample.h"
-#include "Materials/MaterialExpressionCyLandLayerBlend.h"
-#include "Materials/MaterialExpressionCyLandLayerSwitch.h"
+#include "Landscape/Classes/Materials/MaterialExpressionLandscapeVisibilityMask.h"
+#include "Landscape/Classes/Materials/MaterialExpressionLandscapeLayerWeight.h"
+#include "Landscape/Classes/Materials/MaterialExpressionLandscapeLayerSample.h"
+#include "Landscape/Classes/Materials/MaterialExpressionLandscapeLayerBlend.h"
+#include "Landscape/Classes/Materials/MaterialExpressionLandscapeLayerSwitch.h"
 #include "CyLandDataAccess.h"
 #include "CyLandRender.h"
 #include "CyLandRenderMobile.h"
@@ -268,7 +268,7 @@ UMaterialInstanceConstant* UCyLandComponent::GetCombinationMaterial(FMaterialUpd
 			{
 				if (Allocation.LayerInfo)
 				{
-					const FName LayerParameter = (Allocation.LayerInfo == ACyLandProxy::VisibilityLayer) ? UMaterialExpressionCyLandVisibilityMask::ParameterName : Allocation.LayerInfo->LayerName;
+					const FName LayerParameter = (Allocation.LayerInfo == ACyLandProxy::VisibilityLayer) ? UMaterialExpressionLandscapeVisibilityMask::ParameterName : Allocation.LayerInfo->LayerName;
 					StaticParameters.TerrainLayerWeightParameters.Add(FStaticTerrainLayerWeightParameter(LayerParameter, Allocation.WeightmapTextureIndex, true, FGuid(), !Allocation.LayerInfo->bNoWeightBlend));
 				}
 			}
@@ -355,7 +355,7 @@ void UCyLandComponent::UpdateMaterialInstances_Internal(FMaterialUpdateContext& 
 			{
 				FCyWeightmapLayerAllocationInfo& Allocation = WeightmapLayerAllocations[AllocIdx];
 
-				FName LayerName = Allocation.LayerInfo == ACyLandProxy::VisibilityLayer ? UMaterialExpressionCyLandVisibilityMask::ParameterName : Allocation.LayerInfo ? Allocation.LayerInfo->LayerName : NAME_None;
+				FName LayerName = Allocation.LayerInfo == ACyLandProxy::VisibilityLayer ? UMaterialExpressionLandscapeVisibilityMask::ParameterName : Allocation.LayerInfo ? Allocation.LayerInfo->LayerName : NAME_None;
 				MaterialInstance->SetVectorParameterValueEditorOnly(FName(*FString::Printf(TEXT("LayerMask_%s"), *LayerName.ToString())), Masks[Allocation.WeightmapTextureChannel]);
 			}
 
@@ -2068,17 +2068,17 @@ TArray<FName> ACyLandProxy::GetLayersFromMaterial(UMaterialInterface* MaterialIn
 		TArray<FGuid> Guids;
 		if (UMaterialInstance* Instance = Cast<UMaterialInstance>(MaterialInterface))
 		{
-			Instance->GetAllParameterInfo<UMaterialExpressionCyLandLayerBlend>(OutParameterInfo, Guids);
-			Instance->GetAllParameterInfo<UMaterialExpressionCyLandLayerWeight>(OutParameterInfo, Guids);
-			Instance->GetAllParameterInfo<UMaterialExpressionCyLandLayerSwitch>(OutParameterInfo, Guids);
-			Instance->GetAllParameterInfo<UMaterialExpressionCyLandLayerSample>(OutParameterInfo, Guids);
+			Instance->GetAllParameterInfo<UMaterialExpressionLandscapeLayerBlend>(OutParameterInfo, Guids);
+			Instance->GetAllParameterInfo<UMaterialExpressionLandscapeLayerWeight>(OutParameterInfo, Guids);
+			Instance->GetAllParameterInfo<UMaterialExpressionLandscapeLayerSwitch>(OutParameterInfo, Guids);
+			Instance->GetAllParameterInfo<UMaterialExpressionLandscapeLayerSample>(OutParameterInfo, Guids);
 		}
 		else if (UMaterial* Material = MaterialInterface->GetMaterial())
 		{
-			Material->GetAllParameterInfo<UMaterialExpressionCyLandLayerBlend>(OutParameterInfo, Guids);
-			Material->GetAllParameterInfo<UMaterialExpressionCyLandLayerWeight>(OutParameterInfo, Guids);
-			Material->GetAllParameterInfo<UMaterialExpressionCyLandLayerSwitch>(OutParameterInfo, Guids);
-			Material->GetAllParameterInfo<UMaterialExpressionCyLandLayerSample>(OutParameterInfo, Guids);
+			Material->GetAllParameterInfo<UMaterialExpressionLandscapeLayerBlend>(OutParameterInfo, Guids);
+			Material->GetAllParameterInfo<UMaterialExpressionLandscapeLayerWeight>(OutParameterInfo, Guids);
+			Material->GetAllParameterInfo<UMaterialExpressionLandscapeLayerSwitch>(OutParameterInfo, Guids);
+			Material->GetAllParameterInfo<UMaterialExpressionLandscapeLayerSample>(OutParameterInfo, Guids);
 		}
 
 		for (const FMaterialParameterInfo& ParameterInfo : OutParameterInfo)
@@ -5133,11 +5133,11 @@ static void GetAllMobileRelevantLayerNames(TSet<FName>& OutLayerNames, UMaterial
 
 	for (UMaterialExpression* Expression : MobileExpressions)
 	{
-		UMaterialExpressionCyLandLayerWeight* LayerWeightExpression = Cast<UMaterialExpressionCyLandLayerWeight>(Expression);
-		UMaterialExpressionCyLandLayerSwitch* LayerSwitchExpression = Cast<UMaterialExpressionCyLandLayerSwitch>(Expression);
-		UMaterialExpressionCyLandLayerSample* LayerSampleExpression = Cast<UMaterialExpressionCyLandLayerSample>(Expression);
-		UMaterialExpressionCyLandLayerBlend*	LayerBlendExpression = Cast<UMaterialExpressionCyLandLayerBlend>(Expression);
-		UMaterialExpressionCyLandVisibilityMask* VisibilityMaskExpression = Cast<UMaterialExpressionCyLandVisibilityMask>(Expression);
+		UMaterialExpressionLandscapeLayerWeight* LayerWeightExpression = Cast<UMaterialExpressionLandscapeLayerWeight>(Expression);
+		UMaterialExpressionLandscapeLayerSwitch* LayerSwitchExpression = Cast<UMaterialExpressionLandscapeLayerSwitch>(Expression);
+		UMaterialExpressionLandscapeLayerSample* LayerSampleExpression = Cast<UMaterialExpressionLandscapeLayerSample>(Expression);
+		UMaterialExpressionLandscapeLayerBlend*	LayerBlendExpression = Cast<UMaterialExpressionLandscapeLayerBlend>(Expression);
+		UMaterialExpressionLandscapeVisibilityMask* VisibilityMaskExpression = Cast<UMaterialExpressionLandscapeVisibilityMask>(Expression);
 
 		FMaterialParameterInfo BaseParameterInfo;
 		BaseParameterInfo.Association = EMaterialParameterAssociation::GlobalParameter;
@@ -5177,7 +5177,7 @@ void UCyLandComponent::GenerateMobileWeightmapLayerAllocations()
 	GetAllMobileRelevantLayerNames(LayerNames, GetCyLandMaterial()->GetMaterial());
 	MobileWeightmapLayerAllocations = WeightmapLayerAllocations.FilterByPredicate([&](const FCyWeightmapLayerAllocationInfo& Allocation) -> bool 
 		{
-			return Allocation.LayerInfo && LayerNames.Contains(Allocation.LayerInfo == ACyLandProxy::VisibilityLayer ? UMaterialExpressionCyLandVisibilityMask::ParameterName : Allocation.GetLayerName());
+			return Allocation.LayerInfo && LayerNames.Contains(Allocation.LayerInfo == ACyLandProxy::VisibilityLayer ? UMaterialExpressionLandscapeVisibilityMask::ParameterName : Allocation.GetLayerName());
 		}
 	);
 	MobileWeightmapLayerAllocations.StableSort(([&](const FCyWeightmapLayerAllocationInfo& A, const FCyWeightmapLayerAllocationInfo& B) -> bool
@@ -5304,7 +5304,7 @@ void UCyLandComponent::GeneratePlatformPixelData()
 			{
 				if (Allocation.LayerInfo)
 				{
-					FName LayerName = Allocation.LayerInfo == ACyLandProxy::VisibilityLayer ? UMaterialExpressionCyLandVisibilityMask::ParameterName : Allocation.LayerInfo->LayerName;
+					FName LayerName = Allocation.LayerInfo == ACyLandProxy::VisibilityLayer ? UMaterialExpressionLandscapeVisibilityMask::ParameterName : Allocation.LayerInfo->LayerName;
 					NewMobileMaterialInstance->SetVectorParameterValue(FName(*FString::Printf(TEXT("LayerMask_%s"), *LayerName.ToString())), Masks[Allocation.WeightmapTextureChannel]);
 				}
 			}
@@ -5361,7 +5361,7 @@ void UCyLandComponent::GeneratePlatformPixelData()
 			{
 				if (Allocation.LayerInfo)
 				{
-					FName LayerName = Allocation.LayerInfo == ACyLandProxy::VisibilityLayer ? UMaterialExpressionCyLandVisibilityMask::ParameterName : Allocation.LayerInfo->LayerName;
+					FName LayerName = Allocation.LayerInfo == ACyLandProxy::VisibilityLayer ? UMaterialExpressionLandscapeVisibilityMask::ParameterName : Allocation.LayerInfo->LayerName;
 					NewMobileMaterialInstance->SetVectorParameterValueEditorOnly(FName(*FString::Printf(TEXT("LayerMask_%s"), *LayerName.ToString())), Masks[Allocation.WeightmapTextureChannel]);
 				}
 			}
@@ -6094,7 +6094,7 @@ bool ACyLandProxy::CyLandImportHeightmapFromRenderTargetmy(UTextureRenderTarget2
 	FScopedTransaction Transaction(LOCTEXT("Undo_ImportHeightmap", "Importing CyLand Heightmap"));
 
 	FHeightmapAccessor<false> HeightmapAccessor(CyLandInfo);
-	HeightmapAccessor.SetData(MinX, MinY, SampleRect.Width() - 1, SampleRect.Height() - 1, HeightData.GetData());
+	HeightmapAccessor.SetData(*CyLand, MinX, MinY, SampleRect.Width() - 1, SampleRect.Height() - 1, HeightData.GetData());
 
 	double SecondsTaken = FPlatformTime::ToSeconds64(FPlatformTime::Cycles64() - StartCycle);
 	UE_LOG(LogCyLandBP, Display, TEXT("Took %f seconds to import heightmap from render target."), SecondsTaken);

@@ -15,7 +15,7 @@ CyLandLight.cpp: Static lighting for CyLandComponents
 #include "ShadowMap.h"
 #include "CyLandComponent.h"
 #include "CyLandDataAccess.h"
-#include "CyLandGrassType.h"
+#include "LandscapeGrassType.h"
 #include "UnrealEngine.h"
 #include "Materials/Material.h"
 
@@ -747,17 +747,17 @@ void UCyLandComponent::InvalidateLightingCacheDetailed(bool bInvalidateBuildEnqu
 
 	Super::InvalidateLightingCacheDetailed(bInvalidateBuildEnqueuedLighting, bTranslationOnly);
 
-	// invalidate grass that has bUseCyLandLightmap so the new lightmap is applied to the grass
+	// invalidate grass that has bUseLandscapeLightmap so the new lightmap is applied to the grass
 	for (auto Iter = GetCyLandProxy()->FoliageCache.CachedGrassComps.CreateIterator(); Iter; ++Iter)
 	{
 		const auto& GrassKey = Iter->Key;
-		const UCyLandGrassType* GrassType = GrassKey.GrassType.Get();
+		const ULandscapeGrassType* GrassType = GrassKey.GrassType.Get();
 		const UCyLandComponent* BasedOn = GrassKey.BasedOn.Get();
 		UHierarchicalInstancedStaticMeshComponent* GrassComponent = Iter->Foliage.Get();
 
 		if (BasedOn == this && GrassType && GrassComponent &&
 			GrassType->GrassVarieties.IsValidIndex(GrassKey.VarietyIndex) &&
-			GrassType->GrassVarieties[GrassKey.VarietyIndex].bUseCyLandLightmap)
+			GrassType->GrassVarieties[GrassKey.VarietyIndex].bUseLandscapeLightmap)
 		{
 			// Remove this grass component from the cache, which will cause it to be replaced
 			Iter.RemoveCurrent();

@@ -36,11 +36,11 @@ CyLand.cpp: Terrain rendering
 #include "CyLandMaterialInstanceConstant.h"
 #include "Engine/CollisionProfile.h"
 #include "CyLandMeshProxyActor.h"
-#include "Materials/MaterialExpressionCyLandLayerWeight.h"
-#include "Materials/MaterialExpressionCyLandLayerSwitch.h"
-#include "Materials/MaterialExpressionCyLandLayerSample.h"
-#include "Materials/MaterialExpressionCyLandLayerBlend.h"
-#include "Materials/MaterialExpressionCyLandVisibilityMask.h"
+#include "Materials/MaterialExpressionLandscapeLayerWeight.h"
+#include "Materials/MaterialExpressionLandscapeLayerSwitch.h"
+#include "Materials/MaterialExpressionLandscapeLayerSample.h"
+#include "Materials/MaterialExpressionLandscapeLayerBlend.h"
+#include "Materials/MaterialExpressionLandscapeVisibilityMask.h"
 #include "Materials/MaterialInstance.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "ProfilingDebugging/CookStats.h"
@@ -2721,11 +2721,11 @@ void CyLandMaterialsParameterValuesGetter(FStaticParameterSet& OutStaticParamete
 
 		TArray<FMaterialParameterInfo> OutParameterInfo;
 		TArray<FGuid> Guids;
-		Material->GetAllParameterInfo<UMaterialExpressionCyLandLayerWeight>(OutParameterInfo, Guids);
-		Material->GetAllParameterInfo<UMaterialExpressionCyLandLayerSwitch>(OutParameterInfo, Guids);
-		Material->GetAllParameterInfo<UMaterialExpressionCyLandLayerSample>(OutParameterInfo, Guids);
-		Material->GetAllParameterInfo<UMaterialExpressionCyLandLayerBlend>(OutParameterInfo, Guids);
-		Material->GetAllParameterInfo<UMaterialExpressionCyLandVisibilityMask>(OutParameterInfo, Guids);
+		Material->GetAllParameterInfo<UMaterialExpressionLandscapeLayerWeight>(OutParameterInfo, Guids);
+		Material->GetAllParameterInfo<UMaterialExpressionLandscapeLayerSwitch>(OutParameterInfo, Guids);
+		Material->GetAllParameterInfo<UMaterialExpressionLandscapeLayerSample>(OutParameterInfo, Guids);
+		Material->GetAllParameterInfo<UMaterialExpressionLandscapeLayerBlend>(OutParameterInfo, Guids);
+		Material->GetAllParameterInfo<UMaterialExpressionLandscapeVisibilityMask>(OutParameterInfo, Guids);
 
 		OutStaticParameterSet.TerrainLayerWeightParameters.AddZeroed(OutParameterInfo.Num());
 		for (int32 ParameterIdx = 0; ParameterIdx < OutParameterInfo.Num(); ParameterIdx++)
@@ -2762,7 +2762,7 @@ void CyLandMaterialsParameterValuesGetter(FStaticParameterSet& OutStaticParamete
 
 bool CyLandMaterialsParameterSetUpdater(FStaticParameterSet& StaticParameterSet, UMaterial* ParentMaterial)
 {
-	return UpdateParameterSet<FStaticTerrainLayerWeightParameter, UMaterialExpressionCyLandLayerWeight>(StaticParameterSet.TerrainLayerWeightParameters, ParentMaterial);
+	return UpdateParameterSet<FStaticTerrainLayerWeightParameter, UMaterialExpressionLandscapeLayerWeight>(StaticParameterSet.TerrainLayerWeightParameters, ParentMaterial);
 }
 
 bool ACyLandProxy::ShouldTickIfViewportsOnly() const
