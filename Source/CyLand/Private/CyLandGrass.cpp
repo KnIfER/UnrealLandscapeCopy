@@ -2231,7 +2231,7 @@ void ACyLandProxy::UpdateGrass(const TArray<FVector>& Cameras, bool bForceSync)
 										NewComp.Foliage = HierarchicalInstancedStaticMeshComponent;
 										FoliageCache.CachedGrassComps.Add(NewComp);
 
-										HierarchicalInstancedStaticMeshComponent->Mobility = EComponentMobility::Static;
+										HierarchicalInstancedStaticMeshComponent->Mobility = EComponentMobility::Movable;
 										HierarchicalInstancedStaticMeshComponent->SetStaticMesh(GrassVariety.GrassMesh);
 										HierarchicalInstancedStaticMeshComponent->MinLOD = GrassVariety.MinLOD;
 										HierarchicalInstancedStaticMeshComponent->bSelectable = false;

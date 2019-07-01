@@ -13,7 +13,10 @@ class CYLAND_API UProceuduralGameLandUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_UCLASS_BODY()
 
-	UFUNCTION(BlueprintCallable, Category = "asAS")
-	static ACyLand* SpawnGameLand(AActor* context);
+	UFUNCTION(BlueprintCallable, Category = "Procedural Rendering")
+	static ACyLand* SpawnGameLand(AActor* context, UMaterialInterface* mat);
+
+	UFUNCTION(BlueprintCallable, Category = "Procedural Rendering")
+	static void NotifyMaterialUpdated(ACyLand* CyLand);
 
 };
