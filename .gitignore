@@ -1,0 +1,11 @@
+.vs/
+Binaries/
+Intermediate/
+Saved/
+worldengine2.sln
+*BuiltData.uasset
+zipout_project.py
+logfile.txt
+#git remote add origin
+#git push -u origin +master
+#git rm filepicker/build/ -r -f

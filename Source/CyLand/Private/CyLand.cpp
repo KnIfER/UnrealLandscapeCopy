@@ -1289,7 +1289,6 @@ void UCyLandComponent::OnUnregister()
 		// Game worlds don't have landscape infos
 		if (World && !World->IsGameWorld())
 		{
-			UE_LOG(LogCyLand, Warning, TEXT("UCyLandComponent OnUnregister"));
 			UCyLandInfo* Info = GetCyLandInfo();
 			if (Info)
 			{
@@ -2438,7 +2437,7 @@ void UCyLandInfo::RegisterActorComponent(UCyLandComponent* Component, bool bMapC
 	{
 		return;
 	}
-	UE_LOG(LogCyLand, Warning, TEXT("RegisterActorComponent sec %s"), *Component->GetSectionBase().ToString());
+	//UE_LOG(LogCyLand, Warning, TEXT("RegisterActorComponent sec %s"), *Component->GetSectionBase().ToString());
 
 	check(Component);
 

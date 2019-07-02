@@ -23,15 +23,13 @@ Super(initilizer)
 
 }
 
-ACyLand* UProceuduralGameLandUtils::SpawnGameLand(AActor* context, UMaterialInterface* mat)
+ACyLand* UProceuduralGameLandUtils::SpawnGameLand(AActor* context, UMaterialInterface* mat
+	, int32 SectionsPerComponent, int32 ComponentCountX, int32 ComponentCountY, int32 QuadsPerComponent
+	)
 {
 	UWorld* GameWorld = context->GetWorld();
 	if (GameWorld && GameWorld->GetCurrentLevel()->bIsVisible)
 	{
-		const int32 SectionsPerComponent = 1;
-		const int32 ComponentCountX = 8;
-		const int32 ComponentCountY = 8;
-		const int32 QuadsPerComponent = 127;
 		const int32 SizeX = ComponentCountX * QuadsPerComponent + 1;
 		const int32 SizeY = ComponentCountY * QuadsPerComponent + 1;
 
@@ -58,7 +56,7 @@ ACyLand* UProceuduralGameLandUtils::SpawnGameLand(AActor* context, UMaterialInte
 
 		ACyLand* CyLand = GameWorld->SpawnActor<ACyLand>(Offset, FRotator(0,0,0));
 		CyLand->SetActorRelativeScale3D(FVector(100,100,100));
-		if (mat)
+		if (mat)//only you~
 			CyLand->CyLandMaterial = mat;
 		CyLand->Imports(FGuid::NewGuid(), 0, 0, SizeX - 1, SizeY - 1, SectionsPerComponent, QuadsPerComponent, Data.GetData(),
 			nullptr, ImportLayers, ECyLandImportAlphamapType::Additive);
